@@ -2,6 +2,9 @@ import streamlit as st
 import replicate
 import os
 from transformers import AutoTokenizer
+from PIL import Image
+import pytesseract
+import io
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./Snowflake_Logomark_blue.svg", "user": "⛷️"}
@@ -85,6 +88,16 @@ if prompt := st.chat_input(disabled=not replicate_api):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="⛷️"):
         st.write(prompt)
+
+# Image upload
+uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"], disabled=not replicate_api)
+if uploaded_image:
+    image = Image.open(uploaded_image)
+    st.image(image, caption='Uploaded Image.', use_column_width=True)
+    text_from_image = pytesseract.image_to_string(image)
+    st.session_state.messages.append({"role": "user", "content": f"Image text extracted: {text_from_image}"})
+    with st.chat_message("user", avatar="⛷️"):
+        st.write(f"Image text extracted: {text_from_image}")
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
