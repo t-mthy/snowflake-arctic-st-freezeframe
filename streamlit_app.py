@@ -71,6 +71,10 @@ def generate_arctic_response():
         else:
             prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
     
+    if st.session_state.temp_image_info:
+        prompt.append(f"assistant\nHere is some context from an image that was uploaded and analyzed: {st.session_state.temp_image_info}")
+        st.session_state.temp_image_info = None
+    
     prompt.append("<|im_start|>assistant")
     prompt.append("")
     prompt_str = "\n".join(prompt)
@@ -90,11 +94,6 @@ def generate_arctic_response():
 
 # User-provided prompt
 if prompt := st.chat_input(disabled=not replicate_api):
-    if st.session_state.temp_image_info:
-        prompt = f"{prompt}\n\nImage Analysis:\n{st.session_state.temp_image_info}"
-        st.session_state.temp_image_info = None
-    
-    # User prompt output
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="⛷️"):
         st.write(prompt)
