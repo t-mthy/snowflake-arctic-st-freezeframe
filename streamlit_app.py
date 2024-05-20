@@ -33,6 +33,10 @@ with st.sidebar:
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
 
+# Store temporary image analysis info
+if "temp_image_info" not in st.session_state:
+    st.session_state.temp_image_info = None
+
 # Display or clear chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=icons[message["role"]]):
@@ -40,6 +44,7 @@ for message in st.session_state.messages:
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
+    st.session_state.temp_image_info = None
 
 st.sidebar.button('Clear chat history', on_click=clear_chat_history)
 st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
@@ -85,6 +90,11 @@ def generate_arctic_response():
 
 # User-provided prompt
 if prompt := st.chat_input(disabled=not replicate_api):
+    if st.session_state.temp_image_info:
+        prompt = f"{prompt}\n\nImage Analysis:\n{st.session_state.temp_image_info}"
+        st.session_state.temp_image_info = None
+    
+    # User prompt output
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="⛷️"):
         st.write(prompt)
@@ -116,12 +126,9 @@ if uploaded_image:
     for line in data_points:
         cv2.line(gray, line[0], line[1], (0, 255, 0), 2)
     st.image(gray, caption='Processed Image with Detected Lines', use_column_width=True)
-    
-    # Append extracted information to the chat messages
-    extracted_info = f"Extracted text: {text_from_image}\nDetected lines: {data_points}"
-    st.session_state.messages.append({"role": "user", "content": extracted_info})
-    with st.chat_message("user", avatar="⛷️"):
-        st.write(extracted_info)
+
+    # Store extracted information temporarily
+    st.session_state.temp_image_info = f"Extracted text: {text_from_image}\nDetected lines: {data_points}"
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
