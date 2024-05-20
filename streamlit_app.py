@@ -4,7 +4,8 @@ import os
 from transformers import AutoTokenizer
 from PIL import Image
 import pytesseract
-import io
+import numpy as np
+import cv2
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./Snowflake_Logomark_blue.svg", "user": "⛷️"}
@@ -42,7 +43,6 @@ def clear_chat_history():
 
 st.sidebar.button('Clear chat history', on_click=clear_chat_history)
 st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
-st.sidebar.caption('Build your own app powered by Arctic and [enter to win](https://arctic-streamlit-hackathon.devpost.com/) $10k in prizes.')
 
 @st.cache_resource(show_spinner=False)
 def get_tokenizer():
@@ -94,10 +94,34 @@ uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"]
 if uploaded_image:
     image = Image.open(uploaded_image)
     st.image(image, caption='Uploaded Image.', use_column_width=True)
+
+    # OCR extract text from image
     text_from_image = pytesseract.image_to_string(image)
-    st.session_state.messages.append({"role": "user", "content": f"Image text extracted: {text_from_image}"})
+
+    # OpenCV convert image to grayscale
+    gray = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+
+    # Find lines with edge detection
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=100, minLineLength=100, maxLineGap=10)
+    
+    data_points = []
+    
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            data_points.append(((x1, y1), (x2, y2)))
+
+    # Plot lines on processed image & display
+    for line in data_points:
+        cv2.line(gray, line[0], line[1], (0, 255, 0), 2)
+    st.image(gray, caption='Processed Image with Detected Lines', use_column_width=True)
+    
+    # Append extracted information to the chat messages
+    extracted_info = f"Extracted text: {text_from_image}\nDetected lines: {data_points}"
+    st.session_state.messages.append({"role": "user", "content": extracted_info})
     with st.chat_message("user", avatar="⛷️"):
-        st.write(f"Image text extracted: {text_from_image}")
+        st.write(extracted_info)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
