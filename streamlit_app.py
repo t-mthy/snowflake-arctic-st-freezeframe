@@ -122,11 +122,6 @@ if uploaded_image:
             x1, y1, x2, y2 = line[0]
             data_points.append(((x1, y1), (x2, y2)))
 
-    # Plot lines on processed image & display
-    for line in data_points:
-        cv2.line(gray, line[0], line[1], (0, 255, 0), 2)
-    st.image(gray, caption='Processed Image with Detected Lines', use_column_width=True)
-
     # Store extracted information temporarily
     st.session_state.temp_image_info = f"Extracted text: {text_from_image}\nDetected lines: {data_points}"
 
