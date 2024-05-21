@@ -11,11 +11,11 @@ import cv2
 icons = {"assistant": "./Snowflake_Logomark_blue.svg", "user": "⛷️"}
 
 # App title
-st.set_page_config(page_title="Snowflake Arctic")
+st.set_page_config(page_title="Freeze Frame | Snowflake Arctic")
 
 # Replicate Credentials
 with st.sidebar:
-    st.title('Snowflake Arctic')
+    st.title('🧊 Freeze Frame')
     if 'REPLICATE_API_TOKEN' in st.secrets:
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
     else:
