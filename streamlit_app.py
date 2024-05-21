@@ -31,7 +31,7 @@ with st.sidebar:
 
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything. I can also provide valuable insights for your graphs and charts! 📈"}]
 
 # Store temporary image analysis info
 if "temp_image_info" not in st.session_state:
@@ -43,7 +43,7 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything. I can also provide valuable insights for your graphs and charts! 📈"}]
     st.session_state.temp_image_info = None
 
 st.sidebar.button('Clear chat history', on_click=clear_chat_history)
